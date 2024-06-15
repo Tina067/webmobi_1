@@ -1,20 +1,118 @@
 import React, { useState } from 'react';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import Validation from './LoginValidation';
+import axios from 'axios';
 
 const Login = () => {
     const [values, setValues] = useState({ email: '', password: '' });
     const [errors, setErrors] = useState({});
 
+    const navigate = useNavigate();
     const handleInput = (event) => {
         setValues(prev => ({ ...prev, [event.target.name]: event.target.value }));
     }
 
+    // const handleSubmit = (event) => {
+    //     event.preventDefault();
+    
+    //     // Validate the form inputs
+    //     const validationErrors = Validation(values);
+    //     setErrors(validationErrors);
+    
+    //     // Check if there are no validation errors
+    //     // && !validationErrors.password
+    //     if (!validationErrors.email && !validationErrors.password) {
+    //         console.log("Validation passed. Submitting form...");
+    
+            // Send the POST request
+    //         axios.post('http://localhost:8081/login', values)
+    //             .then(res => {
+    //                if(res.data === "Success") {
+    //                 navigate('/home');
+    //                }else{
+    //                 alert("No record exist")
+    //                }
+    //             })
+    //             .catch(err => {
+    //                 console.error("Error occurred:", err);
+    //             });
+    //     } else {
+    //         console.log("Validation errors:", validationErrors);
+    //     }
+    // }
+
+    // const handleSubmit = (event) => {
+    //     event.preventDefault();
+    
+    //     // Validate the form inputs
+    //     const validationErrors = Validation(values);
+    //     setErrors(validationErrors);
+    
+    //     // Check if there are no validation errors
+    //     if (!validationErrors.email && !validationErrors.password) {
+    //         console.log("Validation passed. Submitting form...");
+    
+    //         // Send the POST request with appropriate headers
+    //         axios.post('http://localhost:8081/login', values, {
+    //             headers: {
+    //                 'Content-Type': 'application/json'
+    //             }
+    //         })
+    //         .then(res => {
+    //             if (res.data.message === "Success") {
+    //                 // Store the token in local storage or a state management system
+    //                 localStorage.setItem('token', res.data.token);
+    //                 navigate('/home');
+    //             } else {
+    //                 alert("Invalid email or password");
+    //             }
+    //         })
+    //         .catch(err => {
+    //             console.error("Error occurred:", err);
+    //             alert("Login failed. Please try again.");
+    //         });
+    //     } else {
+    //         console.log("Validation errors:", validationErrors);
+    //     }
+    // }
+    
     const handleSubmit = (event) => {
         event.preventDefault();
-        setErrors(Validation(values));
+    
+        // Validate the form inputs
+        const validationErrors = Validation(values);
+        setErrors(validationErrors);
+    
+        // Check if there are no validation errors
+        if (!validationErrors.email && !validationErrors.password) {
+            console.log("Validation passed. Submitting form...");
+    
+            // Send the POST request with appropriate headers
+            axios.post('http://localhost:8081/login', values, {
+                headers: {
+                    'Content-Type': 'application/json'
+                }
+            })
+            .then(res => {
+                if (res.data.message === "Success") {
+                    // Store the token in local storage or a state management system
+                    console.log('Login successful, storing token.');
+                    localStorage.setItem('token', res.data.token);
+                    navigate('/home');
+                } else {
+                    console.log('Login failed: ', res.data.message);
+                    alert("Invalid email or password");
+                }
+            })
+            .catch(err => {
+                console.error("Error occurred:", err.response ? err.response.data : err.message);
+                alert("Login failed. Please try again.");
+            });
+        } else {
+            console.log("Validation errors:", validationErrors);
+        }
     }
-
+    
     return (
         <div className='d-flex justify-content-center align-items-center bg-primary vh-100'>
             <div className='bg-white p-3 rounded w-25'>
